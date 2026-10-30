@@ -1,0 +1,8 @@
+{
+  "name": "Turbo Horizon: Drift Evolution & Multiplayer",
+  "description": "Arcade 3D highway racer featuring enhanced drift physics, precise counter-steering, 10 high-performance cars, custom drift challenges, and real-time multiplayer with live leaderboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
