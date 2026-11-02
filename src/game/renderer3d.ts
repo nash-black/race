@@ -79,6 +79,8 @@ export class GameRenderer {
   private reducedMotion = false;
   private junctionDistance = 0;
   private currentSpeedMph = 0;
+  private smoothCameraX = 0;
+  private smoothLookAtX = 0;
   private currentTrack: TrackConfig = TRACKS[0];
   private readonly ground: THREE.Mesh;
   private readonly skyLight: THREE.HemisphereLight;
@@ -743,10 +745,15 @@ export class GameRenderer {
   }
 
   private updateCamera() {
-    // Keep camera anchored directly behind the player car so turning left/right never shifts the camera away
+    // Keep camera smoothly anchored behind player car during lane changes and drift slides
     const curveAhead = this.getTrackCurveAhead();
-    const cameraTargetX = this.currentPlayerX * 0.88;
-    const lookAtX = this.currentPlayerX * 0.72 + curveAhead * 2.0;
+    const targetCamX = this.currentPlayerX * 0.82;
+    const targetLookX = this.currentPlayerX * 0.65 + curveAhead * 2.2;
+
+    // Smoothly interpolate camera position to eliminate camera glitching/jerking
+    this.smoothCameraX += (targetCamX - this.smoothCameraX) * 0.18;
+    this.smoothLookAtX += (targetLookX - this.smoothLookAtX) * 0.18;
+
     const shake = this.reducedMotion ? 0 : this.cameraShake * 0.022;
 
     // Dynamic FOV based on vehicle velocity
@@ -756,8 +763,8 @@ export class GameRenderer {
       this.camera.updateProjectionMatrix();
     }
 
-    this.camera.position.set(cameraTargetX + (Math.random() - 0.5) * shake, 6.2 + shake, 12.0);
-    this.camera.lookAt(lookAtX, 0.9, -28);
+    this.camera.position.set(this.smoothCameraX + (Math.random() - 0.5) * shake, 6.2 + shake, 12.0);
+    this.camera.lookAt(this.smoothLookAtX, 0.9, -28);
   }
 
   private toWorldPosition(x: number, y: number) {

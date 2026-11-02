@@ -988,8 +988,9 @@ export class RacingGameEngine {
     const baseHandling = (skin.handling ? 480 + (skin.handling - 80) * 8 : 520) + handlingBonus;
     const steerAcceleration = (baseHandling + (isBoosting ? 65 : 0)) * (this.player.speed / 100);
 
-    const grip = isHandbraking ? 0.36 : isBraking ? 0.65 : 3.4;
-    const maxLateralSpeed = 260 + Math.min(80, this.player.speed * 0.38);
+    // Enhanced grip: responsive lane transitions when steering, high directional stability when coasting, and loose slides when handbraking
+    const grip = isHandbraking ? 0.38 : isBraking ? 0.8 : Math.abs(steerInput) > 0.05 ? 5.2 : 7.6;
+    const maxLateralSpeed = 280 + Math.min(90, this.player.speed * 0.4);
 
     this.playerLateralVelocity += steerInput * steerAcceleration * dt;
     this.playerLateralVelocity *= Math.exp(-grip * dt);
@@ -1023,41 +1024,46 @@ export class RacingGameEngine {
     }
     this.counterSteerQuality = counterSteerQuality;
 
-    const driftAngle = (this.playerLateralVelocity / maxLateralSpeed) * -0.28;
-    this.player.targetAngle = Math.max(-0.35, Math.min(0.35, steerInput * 0.12 + driftAngle));
-    this.player.angle += (this.player.targetAngle - this.player.angle) * (1 - Math.exp(-15 * dt));
+    const driftAngle = (this.playerLateralVelocity / maxLateralSpeed) * -0.24;
+    this.player.targetAngle = Math.max(-0.32, Math.min(0.32, steerInput * 0.11 + driftAngle));
+    this.player.angle += (this.player.targetAngle - this.player.angle) * (1 - Math.exp(-18 * dt));
 
-    this.bodyRoll = Math.max(-0.16, Math.min(0.16, -this.playerLateralVelocity / 320));
+    this.bodyRoll = Math.max(-0.14, Math.min(0.14, -this.playerLateralVelocity / 350));
     this.pitchAngle = isBoosting ? -0.045 : isHandbraking ? 0.065 : isBraking ? 0.05 : -0.02;
     this.counterSteerAngle = isCounterSteering ? steerInput * 0.45 : steerInput * 0.35;
 
-    // Road Edge contact
+    // Track active lane cleanly
+    const laneWidth = bounds.laneWidth || bounds.width / 4;
+    this.player.lane = Math.max(0, Math.min(3, Math.floor((this.player.x - bounds.x) / laneWidth)));
+    this.player.targetLane = this.player.lane;
+
+    // Soft, non-glitchy Road Edge contact (no physics bouncing)
     const minX = bounds.x + this.player.width / 2 + 8;
     const maxX = bounds.x + bounds.width - this.player.width / 2 - 8;
 
     if (this.player.x < minX) {
       this.player.x = minX;
-      this.playerLateralVelocity = Math.max(0, -this.playerLateralVelocity * 0.55);
-      const speedScrub = skin.id === 'emerald_apex' ? 25 : 55;
+      this.playerLateralVelocity = 0;
+      const speedScrub = skin.id === 'emerald_apex' ? 20 : 42;
       this.player.speed = Math.max(38, this.player.speed - dt * speedScrub);
 
       if (this.roadEdgeContactCooldown <= 0) {
         sound.playScreech();
         this.addSparks(this.player.x, this.player.y + 25);
-        this.renderer.addCameraShake(0.3);
-        this.roadEdgeContactCooldown = 0.15;
+        this.renderer.addCameraShake(0.18);
+        this.roadEdgeContactCooldown = 0.25;
       }
     } else if (this.player.x > maxX) {
       this.player.x = maxX;
-      this.playerLateralVelocity = Math.min(0, -this.playerLateralVelocity * 0.55);
-      const speedScrub = skin.id === 'emerald_apex' ? 25 : 55;
+      this.playerLateralVelocity = 0;
+      const speedScrub = skin.id === 'emerald_apex' ? 20 : 42;
       this.player.speed = Math.max(38, this.player.speed - dt * speedScrub);
 
       if (this.roadEdgeContactCooldown <= 0) {
         sound.playScreech();
         this.addSparks(this.player.x, this.player.y + 25);
-        this.renderer.addCameraShake(0.3);
-        this.roadEdgeContactCooldown = 0.15;
+        this.renderer.addCameraShake(0.18);
+        this.roadEdgeContactCooldown = 0.25;
       }
     }
 

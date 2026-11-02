@@ -842,6 +842,8 @@ export default function App() {
           driverTag={progress.driverTag}
           driverRank={currentRankInfo.rank}
           driverBounty={progress.bounty}
+          progress={progress}
+          onUpdateStyle={handleUpdateStyle}
         />
       )}
 

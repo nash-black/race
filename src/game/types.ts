@@ -118,6 +118,7 @@ export interface CarSkin {
   badge: string;
   perkTitle: string;
   perkDescription: string;
+  photoUrl?: string;
 }
 
 export interface MarketListing {

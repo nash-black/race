@@ -232,9 +232,9 @@ export const DEFAULT_CAR_UPGRADES: CarUpgrades = {
 };
 
 export const DEFAULT_PROGRESS: PlayerProgress = {
-  bankedCoins: 500, // Generous starting balance to try upgrades and wagers
-  unlockedSkins: ['crimson_fury'],
-  selectedSkinId: 'crimson_fury',
+  bankedCoins: 1500, // Generous starting balance to try upgrades and wagers
+  unlockedSkins: ['apollo_ie', 'lamborghini_svj', 'laferrari_aperta', 'laferrari_corsa', 'crimson_fury'],
+  selectedSkinId: 'apollo_ie',
   driverName: 'Racer 01',
   driverTag: `#${Math.floor(1000 + Math.random() * 9000)}`,
   bounty: 1500,
@@ -244,6 +244,10 @@ export const DEFAULT_PROGRESS: PlayerProgress = {
   winStreak: 0,
   activeTrackId: 'tokyo_midnight',
   carUpgrades: {
+    apollo_ie: { ...DEFAULT_CAR_UPGRADES },
+    lamborghini_svj: { ...DEFAULT_CAR_UPGRADES },
+    laferrari_aperta: { ...DEFAULT_CAR_UPGRADES },
+    laferrari_corsa: { ...DEFAULT_CAR_UPGRADES },
     crimson_fury: { ...DEFAULT_CAR_UPGRADES },
   },
   wonPinkSlips: [],
@@ -263,6 +267,10 @@ export const DEFAULT_PROGRESS: PlayerProgress = {
 };
 
 export const SKIN_UNLOCK_COSTS: Record<string, number> = {
+  apollo_ie: 0,
+  lamborghini_svj: 0,
+  laferrari_aperta: 0,
+  laferrari_corsa: 0,
   crimson_fury: 0,
   cyber_volt: 80,
   midnight_shadow: 160,
@@ -344,7 +352,7 @@ export function loadProgress(): PlayerProgress {
     return {
       bankedCoins: clampNumber(saved.bankedCoins, DEFAULT_PROGRESS.bankedCoins, 0, Number.MAX_SAFE_INTEGER),
       unlockedSkins: Array.isArray(saved.unlockedSkins)
-        ? Array.from(new Set(saved.unlockedSkins.filter((id): id is string => typeof id === 'string')))
+        ? Array.from(new Set([...saved.unlockedSkins.filter((id): id is string => typeof id === 'string'), 'apollo_ie', 'lamborghini_svj', 'laferrari_aperta', 'laferrari_corsa']))
         : DEFAULT_PROGRESS.unlockedSkins,
       selectedSkinId:
         typeof saved.selectedSkinId === 'string' ? saved.selectedSkinId : DEFAULT_PROGRESS.selectedSkinId,
